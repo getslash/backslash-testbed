@@ -13,6 +13,10 @@ _USER_EMAILS = ['john@getslash.org', 'roy@getslash.org']
 _available = list(_USER_EMAILS)
 
 _HOSTS = [f'run-machine-{i:02}' for i in range(5)]
+_SUBJECTS = [
+    {'name': 'micro01', 'product': 'UltraWave Max', 'version': '1.2.0', 'revision': 'FW8927'},
+    {'name': 'micro02', 'product': 'UltraWave Basic', 'version': '1.2.0', 'revision': 'FW7726'},
+]
 
 _logger = logbook.Logger(__name__)
 
@@ -75,27 +79,22 @@ class User:
         self.client = BackslashClient(URL(config.root.backslash_url), token)
 
     async def run(self):
-        while True:
-            suite = Suite()
-            session_id = await self._session_start(suite)
-            for test in suite.tests:
-                await self._run_test(session_id, test)
-            await self._session_end(session_id)
+        async with self.client.api:
+            for iteration in range(1):
+                suite = Suite()
+                session_id = await self._session_start(suite)
+                for test in suite.tests:
+                    await test.run(self.client, session_id)
+                await self._session_end(session_id)
 
     async def _session_start(self, suite):
         result = await self.client.api.report_session_start(
             hostname=random.choice(_HOSTS),
             ttl_seconds=24 * 60 * 60 * 7,
             keepalive_interval=60,
+            subjects = [random.choice(_SUBJECTS)],
         )
         return result['id']
-
-    async def _run_test(self, session_id, test):
-        test_id = (await self.client.api.report_test_start(
-            session_id=session_id,
-            name=test.name, file_name=test.filename))['id']
-        await test.sleep()
-        await self.client.api.report_test_end(id=test_id)
 
 
     async def _session_end(self, session_id):

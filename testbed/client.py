@@ -14,11 +14,17 @@ class API:
 
     def __init__(self, client):
         self.client = client
-        self._session = aiohttp.ClientSession(
+        self.session = aiohttp.ClientSession(
             headers={
                 'X-Backslash-run-token': self.client.token,
                 'X-Backslash-client-version': '2.33.1',
             })
+
+    def __aenter__(self):
+        return self.session.__aenter__()
+
+    def __aexit__(self, *args, **kwargs):
+        return self.session.__aexit__(*args, **kwargs)
 
     def __getattr__(self, attr):
         if attr.startswith('_'):
@@ -26,7 +32,7 @@ class API:
         return functools.partial(self.call, attr)
 
     async def call(self, api_name, **params):
-        async with self._session.post(self.client.url / 'api' / api_name, json=params) as response:
+        async with self.session.post(self.client.url / 'api' / api_name, json=params) as response:
             if response.status != 200:
                 text = await response.text()
                 raise APIException(f'API {api_name!r} failed with {response.status}: {text}')

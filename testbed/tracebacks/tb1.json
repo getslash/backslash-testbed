@@ -1,0 +1,32 @@
+{
+    "traceback": [
+        {
+            "filename": "/home/user/microtech/microwave_tests/tests/__TEST_FILENAME__.py",
+            "lineno": 40,
+            "func_name": "__TEST_NAME__",
+            "code_line": "    assert microwave.get_power_status() == 'ON'",
+            "globals": {
+                "_logger": {
+                    "value": "<logbook.base.Logger object at 0x7f450e5c4ae8>"
+                }
+            },
+            "locals": {
+                "microwave": {
+                    "value": "<Microwave Instance (off)>"
+                }
+            },
+            "is_in_test_code": true,
+            "code_lines_before": [
+                "def __TEST_NAME__(microwave):\n",
+                "    microwave.power_on()\n"
+            ],
+            "code_lines_after": [
+                "    assert microwave.get_model() == microwave.config.model\n"
+            ]
+        }
+    ],
+
+    "exception": {
+        "attributes": null
+    }
+}
